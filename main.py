@@ -1,7 +1,7 @@
 import falcon
 import json
-from controllers.get_users import get_users
-from controllers.create_user import create_user
+from controllers.users import Users
+from controllers.user import User
 
 class RequireJSON(object):
     def process_request(self, req, resp):
@@ -42,8 +42,6 @@ api = application = falcon.API(middleware=[
     RequireJSON(),
     JSONTranslator(),
 ])
-user_service_get_users = get_users()
-user_service_create_user = create_user()
 
-api.add_route('/users', user_service_get_users)
-api.add_route('/users/{uid}', user_service_create_user)
+api.add_route('/users', Users())
+api.add_route('/users/{uid}', User())
