@@ -4,11 +4,11 @@ import json
 import requests
 from model.user import User
 
-class User(object):
+class UserController(object):
     def on_put(self, req, resp, uid):
-        email = req.context['body']['email']
-        password = req.context['body']['password']
-        user = User(uid, email)
+        email = req.context['body'].get('email')
+        password = req.context['body'].get('password')
+        user = User(uid=uid, email=email)
         user.write()
         r = requests.post(
             "http://127.0.0.1:8002/users/" + str(uid) + "/create_token",

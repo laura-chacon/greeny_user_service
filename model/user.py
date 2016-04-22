@@ -11,29 +11,28 @@ us_email_to_uid = conn.get_table('us_email_to_uid')
 us_users = conn.get_table('us_users')
 
 class User:
-    def __init__(self, uid, email):
-        self.uid = uid
-        self.email = email
+    def __init__(self, **kwargs):
+        self.uid = kwargs.get("uid", None)
+        self.email = kwargs.get("email", None)
 
-    def get_uid(self, email):
-        try:
-            uid = us_email_to_uid.get_item(email)['uid']
-        except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
-            uid = None
-        return uid
+    def get_uid(self):
+        return self.uid
 
-    def create(self, uid, email):
-        user = us_users.new_item(
-            attrs = {
-                'uid': uid,
-                'email': email
-            }
-        )
+    def write(self):
+        m = {'uid': self.uid, 'email': self.email}
+        user = us_users.new_item(attrs=m)
         user.put()
-        user = us_email_to_uid.new_item(
-            attrs = {
-                'email': email,
-                'uid': uid
-            }
-        )
+        m = {'email': self.email, 'uid': self.uid}
+        user = us_email_to_uid.new_item(attrs=m)
         user.put()
+
+def try_read_by_email(email):
+    try:
+        m = us_email_to_uid.get_item(email)
+        return User(**m)
+    except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
+        return None
+
+def read_by_email(email):
+    m = us_email_to_uid.get_item(email)
+    return User(**m)
