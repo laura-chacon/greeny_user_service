@@ -2,6 +2,7 @@ import falcon
 import json
 from controllers.users_controller import UsersController
 from controllers.user_controller import UserController
+from controllers.get_next_action_id_controller import GetNextActionIdController
 
 class RequireJSON(object):
     def process_request(self, req, resp):
@@ -41,6 +42,7 @@ class JSONTranslator(object):
 def add_routes(api):
     api.add_route('/users', UsersController())
     api.add_route('/users/{uid}', UserController())
+    api.add_route('/users/{uid}/actions/next_id', GetNextActionIdController())
 
 def create_api():
     api = falcon.API(middleware=[

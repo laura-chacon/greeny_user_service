@@ -24,8 +24,11 @@ class TestUser(testing.TestBase):
         password = str(uuid.uuid4())
         body = {'email': email, 'password': password}
         body = self.req(uid, body)
+        token = json.loads(body)['token']
         self.assertEqual(self.srmock.status, falcon.HTTP_200)
-        # TODO: check assert user exists in db
+        user = model.user.read_by_email(email)
+        self.assertEqual(uid, user.get_uid())
+        self.assertEqual("abc", token)
 
 # TODO: handle case where auth_service.put_password doesn't return 200
 
