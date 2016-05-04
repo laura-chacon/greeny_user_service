@@ -9,7 +9,6 @@ conn = boto.dynamodb.connect_to_region(
         aws_access_key_id = os.environ['ACCESS_KEY_ID'],
         aws_secret_access_key = os.environ['SECRET_ACCESS_KEY'])
 us_actions = conn.get_table('us_actions')
-us_uid_to_next_action_id = conn.get_table('us_uid_to_next_action_id')
 
 class Action:
     def __init__(self, **kwargs):
@@ -25,3 +24,26 @@ class Action:
 
     def get_actionid(self):
         return self.action_id
+
+    def get_datetime(self):
+        return self.datetime
+
+    def write(self):
+        m = {
+            'uid': self.uid,
+            'action_id': self.action_id,
+            'action_type': self.action_type,
+            'datetime': self.datetime,
+            'section': self.section,
+            'score': self.score
+        }
+        action = us_actions.new_item(attrs=m)
+        action.put()
+
+
+def read_by_actionid(action_id):
+    try:
+        m = us_actions.get_item(action_id)
+        return Action(**m)
+    except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
+        return None

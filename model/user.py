@@ -20,6 +20,9 @@ class User:
     def get_uid(self):
         return self.uid
 
+    def get_email(self):
+        return self.email
+
     def get_next_action_id(self):
         return self.next_action_id
 
@@ -48,6 +51,13 @@ def read_by_email(email):
 def read_by_next_action_id(uid):
     try:
         m = us_uid_to_next_action_id.get_item(uid)
+        return User(**m)
+    except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
+        return None
+
+def read_by_uid(uid):
+    try:
+        m = us_users.get_item(uid)
         return User(**m)
     except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
         return None
