@@ -22,7 +22,7 @@ class TestCreateAction(testing.TestBase):
         self.api = main.create_api()
 
     def test_success_create_action(self):
-        uid = "123"
+        uid = "7777"
         email="lauraaa@gmail.com"
         next_action_id = "789"
         action_id = "456"
@@ -30,18 +30,13 @@ class TestCreateAction(testing.TestBase):
         date = json.dumps(datetime.date.today(), default=date_handler)
         section = "bar"
         score = 5
-        action = Action(uid=uid, action_id=action_id, action_type=action_type, datetime=date, section=section, score=score)
-        action.write()
-        user = User(uid=uid, email=email, next_action_id=next_action_id)
-        user.write()
         body_req = {'section': section, 'action_type': action_type, 'score': score}
         body = self.req(uid, action_id, body_req)
         body = json.loads(body)
-        user = model.user.read_by_uid(uid)
-        action = model.action.read_by_actionid(action_id)
-        self.assertEqual(user.get_uid(), action.get_uid())
+        action = model.action.read(uid, action_id)
+        user = model.user.read_by_uid(action.get_uid())
+        self.assertEqual(uid, action.get_uid())
         self.assertEqual(date, action.get_datetime())
-        self.assertEqual(email, user.get_email())
         self.assertNotEqual(next_action_id, user.get_next_action_id())
         self.assertEqual(self.srmock.status, falcon.HTTP_200)
 

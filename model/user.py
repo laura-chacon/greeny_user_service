@@ -1,15 +1,19 @@
 import json
-import boto
+import boto3
 import boto.dynamodb
 import os
+from botocore.exceptions import ClientError
 
-conn = boto.dynamodb.connect_to_region(
-        'eu-west-1',
-        aws_access_key_id = os.environ['ACCESS_KEY_ID'],
-        aws_secret_access_key = os.environ['SECRET_ACCESS_KEY'])
-us_email_to_uid = conn.get_table('us_email_to_uid')
-us_users = conn.get_table('us_users')
-us_uid_to_next_action_id = conn.get_table('us_uid_to_next_action_id')
+client = boto3.resource(
+    'dynamodb',
+    region_name='eu-west-1',
+    aws_access_key_id=os.environ['ACCESS_KEY_ID'],
+    aws_secret_access_key=os.environ['SECRET_ACCESS_KEY']
+)
+
+us_email_to_uid = client.Table('us_email_to_uid')
+us_users = client.Table('us_users')
+us_uid_to_next_action_id = client.Table('us_uid_to_next_action_id')
 
 class User:
     def __init__(self, **kwargs):
@@ -27,37 +31,78 @@ class User:
         return self.next_action_id
 
     def write(self):
-        m = {'uid': self.uid, 'email': self.email}
-        user = us_users.new_item(attrs=m)
-        user.put()
-        m = {'email': self.email, 'uid': self.uid}
-        user = us_email_to_uid.new_item(attrs=m)
-        user.put()
-        m = {'uid': self.uid, 'next_action_id': self.next_action_id}
-        user = us_uid_to_next_action_id.new_item(attrs=m)
-        user.put()
+        if self.email != None:
+            us_users.put_item(
+                Item={
+                    'uid': self.uid,
+                    'email': self.email
+                }
+            )
+            us_email_to_uid.put_item(
+                Item={
+                    'email': self.email,
+                    'uid': self.uid
+                }
+            )
+        if self.next_action_id != None:
+            us_uid_to_next_action_id.put_item(
+                Item={
+                    'uid': self.uid,
+                    'next_action_id': self.next_action_id
+                }
+            )
+
 
 def try_read_by_email(email):
-    try:
-        m = us_email_to_uid.get_item(email)
-        return User(**m)
-    except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
-        return None
+    response = us_email_to_uid.get_item(
+        Key={
+            'email': email
+        }
+    )
+    if 'Item' in response:
+        item = response['Item']
+        return User(**item)
+
 
 def read_by_email(email):
-    m = us_email_to_uid.get_item(email)
+    m = us_email_to_uid.get_item(
+        Key={
+            'email': email
+        }
+    )
+    m = m['Item']
     return User(**m)
 
 def read_by_next_action_id(uid):
     try:
-        m = us_uid_to_next_action_id.get_item(uid)
+        m = us_uid_to_next_action_id.get_item(
+            Key={
+                'uid': uid
+            }
+        )
+        m = m['Item']
         return User(**m)
-    except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
-        return None
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == 'EntityAlreadyExists':
+            print "User already exists"
+        else:
+            print "Unexpected error: %s" % e
 
 def read_by_uid(uid):
     try:
-        m = us_users.get_item(uid)
+        m = us_users.get_item(
+            Key={
+                'uid': uid
+            }
+        )
+        m = m['Item']
         return User(**m)
-    except boto.dynamodb.exceptions.DynamoDBKeyNotFoundError:
-        return None
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == 'EntityAlreadyExists':
+            print "User already exists"
+        else:
+            print "Unexpected error: %s" % e
+
+
+def read_history(uid):
+    return None
