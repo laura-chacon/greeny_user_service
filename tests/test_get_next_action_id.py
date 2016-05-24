@@ -14,7 +14,7 @@ class TestGetNextActionId(testing.TestBase):
     def test_get_next_action_id(self):
         uid = str(uuid.uuid4())
         email = "lau@gmail.com"
-        next_action_id = str(uuid.uuid4())
+        next_action_id = str(22) + "-"  +str(uuid.uuid4())
         user = User(uid=uid, email=email, next_action_id=next_action_id)
         user.write()
         body = self.req(uid)

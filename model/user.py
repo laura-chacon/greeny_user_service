@@ -3,6 +3,7 @@ import boto3
 import boto.dynamodb
 import os
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key
 
 client = boto3.resource(
     'dynamodb',
@@ -14,6 +15,7 @@ client = boto3.resource(
 us_email_to_uid = client.Table('us_email_to_uid')
 us_users = client.Table('us_users')
 us_uid_to_next_action_id = client.Table('us_uid_to_next_action_id')
+us_actions = client.Table('us_actions')
 
 class User:
     def __init__(self, **kwargs):
@@ -105,4 +107,7 @@ def read_by_uid(uid):
 
 
 def read_history(uid):
-    return None
+    response = us_actions.query(
+        KeyConditionExpression=Key('uid').eq(uid)
+    )
+    return response['Items']

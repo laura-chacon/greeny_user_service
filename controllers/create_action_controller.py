@@ -25,7 +25,8 @@ class CreateActionController(object):
         action = Action(uid=uid, action_id=action_id, action_type=action_type,
                         datetime=date, section=section, score=score)
         action.write()
-        next_action_id = str(uuid.uuid4())
+        cont = action_id.rpartition('-')[0]
+        next_action_id = str(cont) + "-" + str(uuid.uuid4())
         user = User(uid=uid, next_action_id=next_action_id)
         user.write()
         req.context['result'] = {}

@@ -5,11 +5,15 @@ import uuid
 import requests
 from model.user import User
 
+cont = 0
+
 class UserController(object):
     def on_put(self, req, resp, uid):
+        global cont
         email = req.context['body'].get('email')
         password = req.context['body'].get('password')
-        next_action_id = str(uuid.uuid4())
+        next_action_id = str(cont) + "-" + str(uuid.uuid4())
+        cont += 1
         user = User(uid=uid, email=email, next_action_id=next_action_id)
         user.write()
         r = requests.post(

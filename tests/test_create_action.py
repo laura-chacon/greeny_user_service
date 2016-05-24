@@ -24,14 +24,15 @@ class TestCreateAction(testing.TestBase):
     def test_success_create_action(self):
         uid = "7777"
         email="lauraaa@gmail.com"
-        next_action_id = "789"
-        action_id = "456"
+        next_action_id = "1-fdsafa789"
+        action_id = "24-asda456"
         action_type = "foo"
         date = json.dumps(datetime.date.today(), default=date_handler)
         section = "bar"
         score = 5
         body_req = {'section': section, 'action_type': action_type, 'score': score}
         body = self.req(uid, action_id, body_req)
+        body = self.req(uid, "8-j4h4g3", body_req)
         body = json.loads(body)
         action = model.action.read(uid, action_id)
         user = model.user.read_by_uid(action.get_uid())

@@ -14,7 +14,7 @@ class TestUsers(testing.TestBase):
     def test_user_found(self):
         uid = str(uuid.uuid4())
         email = "laura@gmail.com"
-        next_action_id = str(uuid.uuid4())
+        next_action_id = str(11) + "-" + str(uuid.uuid4())
         body_req = {'email': email}
         user = User(uid=uid, email=email, next_action_id=next_action_id)
         user.write()
