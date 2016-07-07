@@ -39,7 +39,6 @@ class TestGetActionHistory(testing.TestBase):
         body = self.req(uid)
         body = json.loads(body)
         user_history = body['user_history']
-        print user_history
         self.assertEqual(self.srmock.status, falcon.HTTP_200)
 
 

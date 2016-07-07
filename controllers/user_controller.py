@@ -12,21 +12,21 @@ class UserController(object):
         global cont
         email = req.context['body'].get('email')
         password = req.context['body'].get('password')
-        next_action_id = str(cont) + "-" + str(uuid.uuid4())
+        next_action_id = str(cont) + "-" + str(uuid.uuid4().int)
         cont += 1
         user = User(uid=uid, email=email, next_action_id=next_action_id)
         user.write()
         r = requests.post(
             "http://127.0.0.1:8002/users/" + str(uid) + "/create_token",
-            data=json.dumps({}),
             headers={"Content-Type": "application/json",
-                     "Accept": "application/json"})
-        token = json.loads(r.content)['token']
+                     "Accept": "application/json"}
+        )
+        auth_token = json.loads(r.content)['auth_token']
         r = requests.put(
             "http://127.0.0.1:8002/users/" + str(uid) + "/password",
             data=json.dumps({"password": password}),
             headers={"Content-Type": "application/json",
                      "Accept": "application/json"}
         )
-        req.context['result'] = {'token': token}
+        req.context['result'] = {'auth_token': auth_token}
         resp.status = falcon.HTTP_200

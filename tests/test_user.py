@@ -17,14 +17,14 @@ class TestUser(testing.TestBase):
     @patch('requests.post')
     @patch('requests.put')
     def test_put_user(self, mock_requests_put, mock_requests_post):
-        mock_requests_post.return_value = TestUser.MockResponse('{"token": "abc"}')
+        mock_requests_post.return_value = TestUser.MockResponse('{"auth_token": "abc"}')
         mock_requests_put.return_value = TestUser.MockResponse('')
         uid = str(uuid.uuid4())
         email = "laurac@gmail.com"
         password = str(uuid.uuid4())
         body = {'email': email, 'password': password}
         body = self.req(uid, body)
-        token = json.loads(body)['token']
+        token = json.loads(body)['auth_token']
         self.assertEqual(self.srmock.status, falcon.HTTP_200)
         user = model.user.read_by_email(email)
         self.assertEqual(uid, user.get_uid())
