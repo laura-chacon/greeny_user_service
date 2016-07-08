@@ -4,10 +4,12 @@ import uuid
 import json
 from model.user import User
 import model.user
+import urlparse
 
 class UsersController(object):
     def on_get(self, req, resp):
-        email = req.context['body'].get('email')
+        query_string = req.query_string
+        email = urlparse.parse_qs(query_string)['email'][0]
         user = model.user.try_read_by_email(email)
         if user == None:
             new_uid = str(uuid.uuid4())
